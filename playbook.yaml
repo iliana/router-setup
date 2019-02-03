@@ -2,10 +2,16 @@
 ---
 - hosts: [lesbian-assassin, contessa]
   vars:
-    users: [ilianaw]
+    users: [ilianaw, esk]
   become: true
   become_method: sudo
   tasks:
+    - name: set up users
+      user: name={{ item }} groups=sudo password_lock=yes
+      with_items: "{{ users }}"
+    - name: set up authorized_keys
+      authorized_key: user={{ item }} key={{ lookup('file', 'files/ssh/' + item) }} state=present
+      with_items: "{{ users }}"
     - name: /etc/network/interfaces
       copy: src={{ inventory_hostname }}-interfaces dest=/etc/network/interfaces owner=root group=root mode=0644
     - name: /etc/resolv.conf
