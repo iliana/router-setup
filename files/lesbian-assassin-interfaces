@@ -1,0 +1,12 @@
+auto lo
+iface lo inet loopback
+
+allow-hotplug ens3
+iface ens3 inet static
+address 209.251.245.128
+netmask 255.255.255.0
+gateway 209.251.245.254
+iface ens3 inet6 static
+address 2620:fc:c000::6969
+netmask 64
+gateway 2620:fc:c000::

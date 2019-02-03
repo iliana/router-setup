@@ -1,0 +1,14 @@
+auto lo
+iface lo inet loopback
+
+allow-hotplug enp1s0
+iface enp1s0 inet manual
+iface enp1s0 inet6 auto
+
+allow-hotplug enp2s0
+iface enp2s0 inet static
+address 10.57.25.254
+netmask 255.255.255.0
+iface enp2s0 inet6 static
+address fd40:ab42:88b5:ef9e::
+netmask 64

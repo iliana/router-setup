@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: GPL-3.0-only
+---
+- hosts: [lesbian-assassin, contessa]
+  vars:
+    users: [ilianaw]
+  become: true
+  become_method: sudo
+  tasks:
+    - name: /etc/network/interfaces
+      copy: src={{ inventory_hostname }}-interfaces dest=/etc/network/interfaces owner=root group=root mode=0644
+    - name: /etc/resolv.conf
+      copy: src=resolv.conf dest=/etc/resolv.conf owner=root group=root mode=0644
+    - name: /etc/apt/sources.list
+      copy: src=sources.list dest=/etc/apt/sources.list owner=root group=root mode=0644
+    - name: /etc/apt/preferences.d/limit-unstable
+      copy: src=limit-unstable dest=/etc/apt/preferences.d/limit-unstable owner=root group=root mode=0644
+    - name: install some shit
+      apt: name="{{ packages }}" state=present
+      vars:
+        packages:
+          - htop
+          - linux-headers-amd64
+          - tcpdump
+          - traceroute
+          - vim
+          - wireguard
+    - name: generate wireguard key pair
+      shell: umask 077 && wg genkey | tee /etc/wireguard/privatekey | wg pubkey >/etc/wireguard/publickey
+      args:
+        creates: /etc/wireguard/privatekey
+    - name: read wireguard private key
+      slurp: src=/etc/wireguard/privatekey
+      register: wg_privatekey
+    - name: read wireguard public key
+      slurp: src=/etc/wireguard/publickey
+      register: wg_publickey
+    - name: /etc/wireguard/wg0.conf
+      template: src={{ inventory_hostname }}-wg0.conf dest=/etc/wireguard/wg0.conf owner=root group=root mode=0600
+    - name: start wg-quick@wg0.service
+      systemd: name=wg-quick@wg0.service state=started enabled=yes
+    - name: /etc/sysctl.d/wireguard.conf
+      copy: src=sysctl.conf dest=/etc/sysctl.d/wireguard.conf owner=root group=root mode=0644
+- hosts: [contessa]
+  become: true
+  become_method: sudo
+  tasks:
+    - name: install dnsmasq
+      apt: name=dnsmasq state=present
+    - name: install dnsmasq.service override unit
+      copy: src=dnsmasq.service dest=/etc/systemd/system/dnsmasq.service owner=root group=root mode=0644
+      register: dnsmasq_service_installed
+    - name: systemctl daemon-reload
+      systemd: daemon_reload=yes
+      when: dnsmasq_service_installed.changed
+    - name: /etc/dnsmasq.conf
+      copy: src=dnsmasq.conf dest=/etc/dnsmasq.conf owner=root group=root mode=0644
+    - name: start dnsmasq.service
+      systemd: name=dnsmasq.service state=started enabled=yes
