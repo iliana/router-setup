@@ -3,7 +3,8 @@ iface lo inet loopback
 
 allow-hotplug enp1s0
 iface enp1s0 inet manual
-iface enp1s0 inet6 auto
+iface enp1s0 inet6 dhcp
+accept_ra 2
 
 allow-hotplug enp2s0
 iface enp2s0 inet static

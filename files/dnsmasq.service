@@ -5,8 +5,7 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/run/dnsmasq/dnsmasq.pid
-ExecStart=/usr/sbin/dnsmasq -x /run/dnsmasq/dnsmasq.pid
+ExecStart=/usr/sbin/dnsmasq
 
 [Install]
 WantedBy=multi-user.target

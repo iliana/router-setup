@@ -50,6 +50,8 @@
   become: true
   become_method: sudo
   tasks:
+    - name: /etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone
+      copy: src=leave_my_resolv_conf_alone dest=/etc/dhcp/dhclient-enter-hooks.d/leave_my_resolv_conf_alone owner=root group=root mode=0755
     - name: install dnsmasq
       apt: name=dnsmasq state=present
     - name: install dnsmasq.service override unit
